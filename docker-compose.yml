@@ -6,6 +6,11 @@ services:
       POSTGRES_DB: akciski_plan
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d akciski_plan"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
     ports:
       - "5432:5432"
     volumes:
@@ -17,12 +22,13 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     env_file:
       - .env
     ports:
       - "3000:3000"
-    command: sh -c "npm run db:generate && npm run db:deploy && npm run bootstrap:admin && npm run start"
+    command: sh -c "npm run db:generate && npm run db:push && npm run bootstrap:admin && npm run start"
 
 volumes:
   postgres_data:

@@ -193,7 +193,17 @@ export function StudentDirectory({
 
         <div className="directory-grid">
           {filtered.map((student) => (
-            <Link key={student.id} href={`/students/${student.id}${student.plans[0] ? `?plan=${student.plans[0].id}` : ""}`} className="student-card">
+            <Link
+              key={student.id}
+              href={{
+                pathname: "/students/[id]",
+                query: {
+                  id: student.id,
+                  ...(student.plans[0] ? { plan: student.plans[0].id } : {})
+                }
+              }}
+              className="student-card"
+            >
               <div className="student-card-top">
                 <div>
                   <h3>{student.fullName}</h3>

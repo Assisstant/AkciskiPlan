@@ -1,3 +1,4 @@
+import type { Route } from "next";
 import Link from "next/link";
 import { LogoutButton } from "@/components/logout-button";
 import { SessionUser } from "@/lib/session";
@@ -12,18 +13,21 @@ export function AppShell({
 }) {
   const links = [
     {
-      href: "/students",
+      href: "/students" as Route,
       label: "Ученици"
     },
     ...(user.role === "admin"
       ? [
           {
-            href: "/admin/users",
+            href: "/admin/users" as Route,
             label: "Корисници"
           }
         ]
       : [])
-  ];
+  ] satisfies Array<{
+    href: Route;
+    label: string;
+  }>;
 
   return (
     <div className="app-shell">
