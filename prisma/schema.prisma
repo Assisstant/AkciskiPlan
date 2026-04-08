@@ -1,0 +1,104 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  admin
+  editor
+  viewer
+}
+
+enum StudentStatus {
+  active
+  archived
+}
+
+model User {
+  id                String              @id @default(cuid())
+  username          String              @unique
+  displayName       String
+  passwordHash      String
+  role              UserRole
+  active            Boolean             @default(true)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  createdPlans      ActionPlan[]        @relation("PlanCreatedBy")
+  updatedPlans      ActionPlan[]        @relation("PlanUpdatedBy")
+  createdVersions   ActionPlanVersion[] @relation("VersionCreatedBy")
+  assignments       StudentAssignment[] @relation("AssignmentUser")
+  assignmentActions StudentAssignment[] @relation("AssignmentCreatedBy")
+  lastEditedRecords Student[]           @relation("StudentLastEditedBy")
+}
+
+model Student {
+  id             String              @id @default(cuid())
+  fullName       String
+  grade          String              @default("")
+  programType    String              @default("")
+  schoolYear     String              @default("")
+  status         StudentStatus       @default(active)
+  lastEditedAt   DateTime?
+  lastEditedById String?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  assignments    StudentAssignment[]
+  plans          ActionPlan[]
+  lastEditedBy   User?               @relation("StudentLastEditedBy", fields: [lastEditedById], references: [id], onDelete: SetNull)
+
+  @@index([fullName])
+  @@index([schoolYear])
+  @@index([status])
+}
+
+model StudentAssignment {
+  id           String   @id @default(cuid())
+  studentId    String
+  userId       String
+  assignedById String?
+  assignedAt   DateTime @default(now())
+  student      Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  user         User     @relation("AssignmentUser", fields: [userId], references: [id], onDelete: Cascade)
+  assignedBy   User?    @relation("AssignmentCreatedBy", fields: [assignedById], references: [id], onDelete: SetNull)
+
+  @@unique([studentId, userId])
+  @@index([userId])
+}
+
+model ActionPlan {
+  id             String              @id @default(cuid())
+  studentId      String
+  schoolYear     String
+  status         String              @default("active")
+  version        Int                 @default(1)
+  currentPayload Json
+  createdById    String
+  updatedById    String
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  student        Student             @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  createdBy      User                @relation("PlanCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  updatedBy      User                @relation("PlanUpdatedBy", fields: [updatedById], references: [id], onDelete: Restrict)
+  versions       ActionPlanVersion[]
+
+  @@unique([studentId, schoolYear])
+  @@index([schoolYear])
+}
+
+model ActionPlanVersion {
+  id          String   @id @default(cuid())
+  actionPlanId String
+  version     Int
+  snapshot    Json
+  createdById String
+  createdAt   DateTime @default(now())
+  note        String   @default("")
+  actionPlan  ActionPlan @relation(fields: [actionPlanId], references: [id], onDelete: Cascade)
+  createdBy   User       @relation("VersionCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@index([actionPlanId, version])
+}

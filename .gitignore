@@ -1,0 +1,15 @@
+.next
+node_modules
+.env
+.env.local
+coverage
+dist
+*.log
+*.tsbuildinfo
+prisma/dev.db
+fis.zip
+akcisko_preview.html
+akcisko-dosie.jsx
+demo_akcisko.json
+AP/demo_akcisko_docx_concept.json
+AP/akcisko_preview_docx_concept.html

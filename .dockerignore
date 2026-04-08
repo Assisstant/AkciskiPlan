@@ -1,0 +1,11 @@
+.git
+.next
+node_modules
+coverage
+dist
+*.log
+fis.zip
+akcisko_preview.html
+akcisko-dosie.jsx
+demo_akcisko.json
+AP
