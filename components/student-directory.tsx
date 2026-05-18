@@ -1,5 +1,6 @@
 "use client";
 
+import type { Route } from "next";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { PROGRAM_TYPES } from "@/lib/catalog/akciski-plan";
@@ -195,13 +196,9 @@ export function StudentDirectory({
           {filtered.map((student) => (
             <Link
               key={student.id}
-              href={{
-                pathname: "/students/[id]",
-                query: {
-                  id: student.id,
-                  ...(student.plans[0] ? { plan: student.plans[0].id } : {})
-                }
-              }}
+              href={
+                `/students/${student.id}${student.plans[0] ? `?plan=${student.plans[0].id}` : ""}` as Route
+              }
               className="student-card"
             >
               <div className="student-card-top">
